@@ -1,0 +1,838 @@
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"console.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Application/source/console.c"
+  18              		.section	.bss.console_uart,"aw",%nobits
+  19              		.align	2
+  22              	console_uart:
+  23 0000 00000000 		.space	4
+  24              		.section	.bss.rx_byte,"aw",%nobits
+  27              	rx_byte:
+  28 0000 00       		.space	1
+  29              		.section	.bss.rx_ready,"aw",%nobits
+  32              	rx_ready:
+  33 0000 00       		.space	1
+  34              		.section	.bss.rx_index,"aw",%nobits
+  35              		.align	1
+  38              	rx_index:
+  39 0000 0000     		.space	2
+  40              		.section	.bss.rx_buffer,"aw",%nobits
+  41              		.align	2
+  44              	rx_buffer:
+  45 0000 00000000 		.space	128
+  45      00000000 
+  45      00000000 
+  45      00000000 
+  45      00000000 
+  46              		.section	.bss.rx_temp_char,"aw",%nobits
+  49              	rx_temp_char:
+  50 0000 00       		.space	1
+  51              		.section	.text.console_init,"ax",%progbits
+  52              		.align	1
+  53              		.global	console_init
+  54              		.syntax unified
+  55              		.thumb
+  56              		.thumb_func
+  58              	console_init:
+  59              	.LFB65:
+   1:Application/source/console.c **** #include "console.h"
+   2:Application/source/console.c **** #include "stm32f1xx.h"
+   3:Application/source/console.c **** 
+   4:Application/source/console.c **** #include <string.h>
+   5:Application/source/console.c **** #include <stdint.h>
+   6:Application/source/console.c **** 
+   7:Application/source/console.c **** static UART_HandleTypeDef *console_uart = NULL;
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 2
+
+
+   8:Application/source/console.c **** 
+   9:Application/source/console.c **** static volatile uint8_t rx_byte;
+  10:Application/source/console.c **** static volatile uint8_t rx_ready = 0;
+  11:Application/source/console.c **** static volatile uint16_t rx_index = 0;
+  12:Application/source/console.c **** static char rx_buffer[CONSOLE_MAX_INPUT_DATA_LENGTH];
+  13:Application/source/console.c **** static char rx_temp_char;
+  14:Application/source/console.c **** 
+  15:Application/source/console.c **** uint8_t console_init(UART_HandleTypeDef *huart) {
+  60              		.loc 1 15 49
+  61              		.cfi_startproc
+  62              		@ args = 0, pretend = 0, frame = 8
+  63              		@ frame_needed = 1, uses_anonymous_args = 0
+  64 0000 80B5     		push	{r7, lr}
+  65              	.LCFI0:
+  66              		.cfi_def_cfa_offset 8
+  67              		.cfi_offset 7, -8
+  68              		.cfi_offset 14, -4
+  69 0002 82B0     		sub	sp, sp, #8
+  70              	.LCFI1:
+  71              		.cfi_def_cfa_offset 16
+  72 0004 00AF     		add	r7, sp, #0
+  73              	.LCFI2:
+  74              		.cfi_def_cfa_register 7
+  75 0006 7860     		str	r0, [r7, #4]
+  16:Application/source/console.c ****     if (huart == NULL || console_uart != NULL) {
+  76              		.loc 1 16 8
+  77 0008 7B68     		ldr	r3, [r7, #4]
+  78 000a 002B     		cmp	r3, #0
+  79 000c 03D0     		beq	.L2
+  80              		.loc 1 16 39 discriminator 1
+  81 000e 0A4B     		ldr	r3, .L5
+  82 0010 1B68     		ldr	r3, [r3]
+  83              		.loc 1 16 23 discriminator 1
+  84 0012 002B     		cmp	r3, #0
+  85 0014 01D0     		beq	.L3
+  86              	.L2:
+  17:Application/source/console.c ****         return 1;
+  87              		.loc 1 17 16
+  88 0016 0123     		movs	r3, #1
+  89 0018 0AE0     		b	.L4
+  90              	.L3:
+  18:Application/source/console.c ****     }
+  19:Application/source/console.c **** 
+  20:Application/source/console.c ****     console_uart = huart;
+  91              		.loc 1 20 18
+  92 001a 074A     		ldr	r2, .L5
+  93 001c 7B68     		ldr	r3, [r7, #4]
+  94 001e 1360     		str	r3, [r2]
+  21:Application/source/console.c **** 
+  22:Application/source/console.c ****     HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_temp_char, 1);
+  95              		.loc 1 22 5
+  96 0020 054B     		ldr	r3, .L5
+  97 0022 1B68     		ldr	r3, [r3]
+  98 0024 0122     		movs	r2, #1
+  99 0026 0549     		ldr	r1, .L5+4
+ 100 0028 1846     		mov	r0, r3
+ 101 002a FFF7FEFF 		bl	HAL_UART_Receive_IT
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 3
+
+
+  23:Application/source/console.c ****     return 0;
+ 102              		.loc 1 23 12
+ 103 002e 0023     		movs	r3, #0
+ 104              	.L4:
+  24:Application/source/console.c **** }
+ 105              		.loc 1 24 1
+ 106 0030 1846     		mov	r0, r3
+ 107 0032 0837     		adds	r7, r7, #8
+ 108              	.LCFI3:
+ 109              		.cfi_def_cfa_offset 8
+ 110 0034 BD46     		mov	sp, r7
+ 111              	.LCFI4:
+ 112              		.cfi_def_cfa_register 13
+ 113              		@ sp needed
+ 114 0036 80BD     		pop	{r7, pc}
+ 115              	.L6:
+ 116              		.align	2
+ 117              	.L5:
+ 118 0038 00000000 		.word	console_uart
+ 119 003c 00000000 		.word	rx_temp_char
+ 120              		.cfi_endproc
+ 121              	.LFE65:
+ 123              		.section	.text.console_print,"ax",%progbits
+ 124              		.align	1
+ 125              		.global	console_print
+ 126              		.syntax unified
+ 127              		.thumb
+ 128              		.thumb_func
+ 130              	console_print:
+ 131              	.LFB66:
+  25:Application/source/console.c **** 
+  26:Application/source/console.c **** void console_print(const char *str) {
+ 132              		.loc 1 26 37
+ 133              		.cfi_startproc
+ 134              		@ args = 0, pretend = 0, frame = 8
+ 135              		@ frame_needed = 1, uses_anonymous_args = 0
+ 136 0000 90B5     		push	{r4, r7, lr}
+ 137              	.LCFI5:
+ 138              		.cfi_def_cfa_offset 12
+ 139              		.cfi_offset 4, -12
+ 140              		.cfi_offset 7, -8
+ 141              		.cfi_offset 14, -4
+ 142 0002 83B0     		sub	sp, sp, #12
+ 143              	.LCFI6:
+ 144              		.cfi_def_cfa_offset 24
+ 145 0004 00AF     		add	r7, sp, #0
+ 146              	.LCFI7:
+ 147              		.cfi_def_cfa_register 7
+ 148 0006 7860     		str	r0, [r7, #4]
+  27:Application/source/console.c ****     if (str == NULL) {
+ 149              		.loc 1 27 8
+ 150 0008 7B68     		ldr	r3, [r7, #4]
+ 151 000a 002B     		cmp	r3, #0
+ 152 000c 1DD0     		beq	.L12
+  28:Application/source/console.c ****         return;
+  29:Application/source/console.c ****     }
+  30:Application/source/console.c **** 
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 4
+
+
+  31:Application/source/console.c ****     HAL_UART_Transmit_IT(console_uart, (uint8_t *) str, strlen(str));
+ 153              		.loc 1 31 5
+ 154 000e 114B     		ldr	r3, .L13
+ 155 0010 1C68     		ldr	r4, [r3]
+ 156              		.loc 1 31 57
+ 157 0012 7868     		ldr	r0, [r7, #4]
+ 158 0014 FFF7FEFF 		bl	strlen
+ 159 0018 0346     		mov	r3, r0
+ 160              		.loc 1 31 5 discriminator 1
+ 161 001a 9BB2     		uxth	r3, r3
+ 162 001c 1A46     		mov	r2, r3
+ 163 001e 7968     		ldr	r1, [r7, #4]
+ 164 0020 2046     		mov	r0, r4
+ 165 0022 FFF7FEFF 		bl	HAL_UART_Transmit_IT
+  32:Application/source/console.c ****     while (
+ 166              		.loc 1 32 11
+ 167 0026 00BF     		nop
+ 168              	.L10:
+  33:Application/source/console.c ****         HAL_UART_GetState(console_uart) == HAL_UART_STATE_BUSY_TX ||
+ 169              		.loc 1 33 9 discriminator 3
+ 170 0028 0A4B     		ldr	r3, .L13
+ 171 002a 1B68     		ldr	r3, [r3]
+ 172 002c 1846     		mov	r0, r3
+ 173 002e FFF7FEFF 		bl	HAL_UART_GetState
+ 174 0032 0346     		mov	r3, r0
+ 175              		.loc 1 33 67 discriminator 3
+ 176 0034 212B     		cmp	r3, #33
+ 177 0036 F7D0     		beq	.L10
+  34:Application/source/console.c ****         HAL_UART_GetState(console_uart) == HAL_UART_STATE_BUSY_TX_RX
+ 178              		.loc 1 34 9
+ 179 0038 064B     		ldr	r3, .L13
+ 180 003a 1B68     		ldr	r3, [r3]
+ 181 003c 1846     		mov	r0, r3
+ 182 003e FFF7FEFF 		bl	HAL_UART_GetState
+ 183 0042 0346     		mov	r3, r0
+  33:Application/source/console.c ****         HAL_UART_GetState(console_uart) == HAL_UART_STATE_BUSY_TX ||
+ 184              		.loc 1 33 67 discriminator 2
+ 185 0044 232B     		cmp	r3, #35
+ 186 0046 EFD0     		beq	.L10
+ 187 0048 00E0     		b	.L7
+ 188              	.L12:
+  28:Application/source/console.c ****     }
+ 189              		.loc 1 28 9
+ 190 004a 00BF     		nop
+ 191              	.L7:
+  35:Application/source/console.c ****     );
+  36:Application/source/console.c **** }
+ 192              		.loc 1 36 1
+ 193 004c 0C37     		adds	r7, r7, #12
+ 194              	.LCFI8:
+ 195              		.cfi_def_cfa_offset 12
+ 196 004e BD46     		mov	sp, r7
+ 197              	.LCFI9:
+ 198              		.cfi_def_cfa_register 13
+ 199              		@ sp needed
+ 200 0050 90BD     		pop	{r4, r7, pc}
+ 201              	.L14:
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 5
+
+
+ 202 0052 00BF     		.align	2
+ 203              	.L13:
+ 204 0054 00000000 		.word	console_uart
+ 205              		.cfi_endproc
+ 206              	.LFE66:
+ 208              		.section	.text.console_read,"ax",%progbits
+ 209              		.align	1
+ 210              		.global	console_read
+ 211              		.syntax unified
+ 212              		.thumb
+ 213              		.thumb_func
+ 215              	console_read:
+ 216              	.LFB67:
+  37:Application/source/console.c **** 
+  38:Application/source/console.c **** uint8_t console_read(char *buffer) {
+ 217              		.loc 1 38 36
+ 218              		.cfi_startproc
+ 219              		@ args = 0, pretend = 0, frame = 8
+ 220              		@ frame_needed = 1, uses_anonymous_args = 0
+ 221 0000 80B5     		push	{r7, lr}
+ 222              	.LCFI10:
+ 223              		.cfi_def_cfa_offset 8
+ 224              		.cfi_offset 7, -8
+ 225              		.cfi_offset 14, -4
+ 226 0002 82B0     		sub	sp, sp, #8
+ 227              	.LCFI11:
+ 228              		.cfi_def_cfa_offset 16
+ 229 0004 00AF     		add	r7, sp, #0
+ 230              	.LCFI12:
+ 231              		.cfi_def_cfa_register 7
+ 232 0006 7860     		str	r0, [r7, #4]
+  39:Application/source/console.c ****     if (buffer == NULL || rx_ready == 0) {
+ 233              		.loc 1 39 8
+ 234 0008 7B68     		ldr	r3, [r7, #4]
+ 235 000a 002B     		cmp	r3, #0
+ 236 000c 04D0     		beq	.L16
+ 237              		.loc 1 39 36 discriminator 1
+ 238 000e 0D4B     		ldr	r3, .L19
+ 239 0010 1B78     		ldrb	r3, [r3]
+ 240 0012 DBB2     		uxtb	r3, r3
+ 241              		.loc 1 39 24 discriminator 1
+ 242 0014 002B     		cmp	r3, #0
+ 243 0016 01D1     		bne	.L17
+ 244              	.L16:
+  40:Application/source/console.c ****         return 0;
+ 245              		.loc 1 40 16
+ 246 0018 0023     		movs	r3, #0
+ 247 001a 0FE0     		b	.L18
+ 248              	.L17:
+ 249              	.LBB6:
+ 250              	.LBB7:
+ 251              		.file 2 "Drivers/CMSIS/Include/cmsis_gcc.h"
+   1:Drivers/CMSIS/Include/cmsis_gcc.h **** /**************************************************************************//**
+   2:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @file     cmsis_gcc.h
+   3:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @brief    CMSIS compiler GCC header file
+   4:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @version  V5.0.4
+   5:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @date     09. April 2018
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 6
+
+
+   6:Drivers/CMSIS/Include/cmsis_gcc.h ****  ******************************************************************************/
+   7:Drivers/CMSIS/Include/cmsis_gcc.h **** /*
+   8:Drivers/CMSIS/Include/cmsis_gcc.h ****  * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+   9:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  10:Drivers/CMSIS/Include/cmsis_gcc.h ****  * SPDX-License-Identifier: Apache-2.0
+  11:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  12:Drivers/CMSIS/Include/cmsis_gcc.h ****  * Licensed under the Apache License, Version 2.0 (the License); you may
+  13:Drivers/CMSIS/Include/cmsis_gcc.h ****  * not use this file except in compliance with the License.
+  14:Drivers/CMSIS/Include/cmsis_gcc.h ****  * You may obtain a copy of the License at
+  15:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  16:Drivers/CMSIS/Include/cmsis_gcc.h ****  * www.apache.org/licenses/LICENSE-2.0
+  17:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  18:Drivers/CMSIS/Include/cmsis_gcc.h ****  * Unless required by applicable law or agreed to in writing, software
+  19:Drivers/CMSIS/Include/cmsis_gcc.h ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+  20:Drivers/CMSIS/Include/cmsis_gcc.h ****  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  21:Drivers/CMSIS/Include/cmsis_gcc.h ****  * See the License for the specific language governing permissions and
+  22:Drivers/CMSIS/Include/cmsis_gcc.h ****  * limitations under the License.
+  23:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+  24:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  25:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __CMSIS_GCC_H
+  26:Drivers/CMSIS/Include/cmsis_gcc.h **** #define __CMSIS_GCC_H
+  27:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  28:Drivers/CMSIS/Include/cmsis_gcc.h **** /* ignore some GCC warnings */
+  29:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic push
+  30:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
+  31:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
+  32:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
+  33:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  34:Drivers/CMSIS/Include/cmsis_gcc.h **** /* Fallback for __has_builtin */
+  35:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __has_builtin
+  36:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __has_builtin(x) (0)
+  37:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  38:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  39:Drivers/CMSIS/Include/cmsis_gcc.h **** /* CMSIS compiler specific defines */
+  40:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ASM
+  41:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __ASM                                  __asm
+  42:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  43:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __INLINE
+  44:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __INLINE                               inline
+  45:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  46:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __STATIC_INLINE
+  47:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __STATIC_INLINE                        static inline
+  48:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  49:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __STATIC_FORCEINLINE                 
+  50:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __STATIC_FORCEINLINE                   __attribute__((always_inline)) static inline
+  51:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif                                           
+  52:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __NO_RETURN
+  53:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __NO_RETURN                            __attribute__((__noreturn__))
+  54:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  55:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __USED
+  56:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __USED                                 __attribute__((used))
+  57:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  58:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __WEAK
+  59:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __WEAK                                 __attribute__((weak))
+  60:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  61:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED
+  62:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED                               __attribute__((packed, aligned(1)))
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 7
+
+
+  63:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  64:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED_STRUCT
+  65:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED_STRUCT                        struct __attribute__((packed, aligned(1)))
+  66:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  67:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED_UNION
+  68:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED_UNION                         union __attribute__((packed, aligned(1)))
+  69:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  70:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32        /* deprecated */
+  71:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  72:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  73:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  74:Drivers/CMSIS/Include/cmsis_gcc.h ****   struct __attribute__((packed)) T_UINT32 { uint32_t v; };
+  75:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  76:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32(x)                  (((struct T_UINT32 *)(x))->v)
+  77:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  78:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_WRITE
+  79:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  80:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  81:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  82:Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
+  83:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  84:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_WRITE(addr, val)    (void)((((struct T_UINT16_WRITE *)(void *)(addr))-
+  85:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  86:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_READ
+  87:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  88:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  89:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  90:Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
+  91:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  92:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_READ(addr)          (((const struct T_UINT16_READ *)(const void *)(add
+  93:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  94:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_WRITE
+  95:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  96:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  97:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  98:Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
+  99:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 100:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_WRITE(addr, val)    (void)((((struct T_UINT32_WRITE *)(void *)(addr))-
+ 101:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 102:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_READ
+ 103:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+ 104:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+ 105:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+ 106:Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
+ 107:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 108:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_READ(addr)          (((const struct T_UINT32_READ *)(const void *)(add
+ 109:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 110:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ALIGNED
+ 111:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __ALIGNED(x)                           __attribute__((aligned(x)))
+ 112:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 113:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __RESTRICT
+ 114:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __RESTRICT                             __restrict
+ 115:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 116:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 117:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 118:Drivers/CMSIS/Include/cmsis_gcc.h **** /* ###########################  Core Function Access  ########################### */
+ 119:Drivers/CMSIS/Include/cmsis_gcc.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 8
+
+
+ 120:Drivers/CMSIS/Include/cmsis_gcc.h ****     \defgroup CMSIS_Core_RegAccFunctions CMSIS Core Register Access Functions
+ 121:Drivers/CMSIS/Include/cmsis_gcc.h ****   @{
+ 122:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 123:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 124:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ 125:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
+ 126:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing the I-bit in the CPSR.
+ 127:Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 128:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 129:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __enable_irq(void)
+ 130:Drivers/CMSIS/Include/cmsis_gcc.h **** {
+ 131:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsie i" : : : "memory");
+ 132:Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ 133:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 134:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 135:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ 136:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Disable IRQ Interrupts
+ 137:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+ 138:Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 139:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 140:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __disable_irq(void)
+ 141:Drivers/CMSIS/Include/cmsis_gcc.h **** {
+ 142:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
+ 252              		.loc 2 142 3
+ 253              		.syntax unified
+ 254              	@ 142 "Drivers/CMSIS/Include/cmsis_gcc.h" 1
+ 255 001c 72B6     		cpsid i
+ 256              	@ 0 "" 2
+ 143:Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ 257              		.loc 2 143 1
+ 258              		.thumb
+ 259              		.syntax unified
+ 260 001e 00BF     		nop
+ 261              	.LBE7:
+ 262              	.LBE6:
+  41:Application/source/console.c ****     }
+  42:Application/source/console.c **** 
+  43:Application/source/console.c ****     __disable_irq();
+  44:Application/source/console.c **** 
+  45:Application/source/console.c ****     strcpy(buffer, rx_buffer);
+ 263              		.loc 1 45 5
+ 264 0020 0949     		ldr	r1, .L19+4
+ 265 0022 7868     		ldr	r0, [r7, #4]
+ 266 0024 FFF7FEFF 		bl	strcpy
+  46:Application/source/console.c ****     rx_ready = 0;
+ 267              		.loc 1 46 14
+ 268 0028 064B     		ldr	r3, .L19
+ 269 002a 0022     		movs	r2, #0
+ 270 002c 1A70     		strb	r2, [r3]
+ 271              	.LBB8:
+ 272              	.LBB9:
+ 131:Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ 273              		.loc 2 131 3
+ 274              		.syntax unified
+ 275              	@ 131 "Drivers/CMSIS/Include/cmsis_gcc.h" 1
+ 276 002e 62B6     		cpsie i
+ 277              	@ 0 "" 2
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 9
+
+
+ 132:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 278              		.loc 2 132 1
+ 279              		.thumb
+ 280              		.syntax unified
+ 281 0030 00BF     		nop
+ 282              	.LBE9:
+ 283              	.LBE8:
+  47:Application/source/console.c **** 
+  48:Application/source/console.c ****     __enable_irq();
+  49:Application/source/console.c **** 
+  50:Application/source/console.c ****     return strlen(buffer);
+ 284              		.loc 1 50 12
+ 285 0032 7868     		ldr	r0, [r7, #4]
+ 286 0034 FFF7FEFF 		bl	strlen
+ 287 0038 0346     		mov	r3, r0
+ 288              		.loc 1 50 12 is_stmt 0 discriminator 1
+ 289 003a DBB2     		uxtb	r3, r3
+ 290              	.L18:
+  51:Application/source/console.c **** }
+ 291              		.loc 1 51 1 is_stmt 1
+ 292 003c 1846     		mov	r0, r3
+ 293 003e 0837     		adds	r7, r7, #8
+ 294              	.LCFI13:
+ 295              		.cfi_def_cfa_offset 8
+ 296 0040 BD46     		mov	sp, r7
+ 297              	.LCFI14:
+ 298              		.cfi_def_cfa_register 13
+ 299              		@ sp needed
+ 300 0042 80BD     		pop	{r7, pc}
+ 301              	.L20:
+ 302              		.align	2
+ 303              	.L19:
+ 304 0044 00000000 		.word	rx_ready
+ 305 0048 00000000 		.word	rx_buffer
+ 306              		.cfi_endproc
+ 307              	.LFE67:
+ 309              		.section	.rodata
+ 310              		.align	2
+ 311              	.LC0:
+ 312 0000 0D0A00   		.ascii	"\015\012\000"
+ 313 0003 00       		.align	2
+ 314              	.LC1:
+ 315 0004 08200800 		.ascii	"\010 \010\000"
+ 316              		.section	.text.console_rx_callback,"ax",%progbits
+ 317              		.align	1
+ 318              		.syntax unified
+ 319              		.thumb
+ 320              		.thumb_func
+ 322              	console_rx_callback:
+ 323              	.LFB68:
+  52:Application/source/console.c **** 
+  53:Application/source/console.c **** static void console_rx_callback() {
+ 324              		.loc 1 53 35
+ 325              		.cfi_startproc
+ 326              		@ args = 0, pretend = 0, frame = 0
+ 327              		@ frame_needed = 1, uses_anonymous_args = 0
+ 328 0000 80B5     		push	{r7, lr}
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 10
+
+
+ 329              	.LCFI15:
+ 330              		.cfi_def_cfa_offset 8
+ 331              		.cfi_offset 7, -8
+ 332              		.cfi_offset 14, -4
+ 333 0002 00AF     		add	r7, sp, #0
+ 334              	.LCFI16:
+ 335              		.cfi_def_cfa_register 7
+  54:Application/source/console.c ****     if (console_uart == NULL) {
+ 336              		.loc 1 54 22
+ 337 0004 2E4B     		ldr	r3, .L31
+ 338 0006 1B68     		ldr	r3, [r3]
+ 339              		.loc 1 54 8
+ 340 0008 002B     		cmp	r3, #0
+ 341 000a 54D0     		beq	.L29
+  55:Application/source/console.c ****         return;
+  56:Application/source/console.c ****     }
+  57:Application/source/console.c **** 
+  58:Application/source/console.c ****     if (rx_index >= CONSOLE_MAX_INPUT_DATA_LENGTH - 1) {
+ 342              		.loc 1 58 18
+ 343 000c 2D4B     		ldr	r3, .L31+4
+ 344 000e 1B88     		ldrh	r3, [r3]	@ movhi
+ 345 0010 9BB2     		uxth	r3, r3
+ 346              		.loc 1 58 8
+ 347 0012 7E2B     		cmp	r3, #126
+ 348 0014 51D8     		bhi	.L30
+  59:Application/source/console.c ****         return;
+  60:Application/source/console.c ****     }
+  61:Application/source/console.c **** 
+  62:Application/source/console.c ****     if (rx_temp_char == '\r' || rx_temp_char == '\n') {
+ 349              		.loc 1 62 22
+ 350 0016 2C4B     		ldr	r3, .L31+8
+ 351 0018 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 352              		.loc 1 62 8
+ 353 001a 0D2B     		cmp	r3, #13
+ 354 001c 03D0     		beq	.L25
+ 355              		.loc 1 62 46 discriminator 1
+ 356 001e 2A4B     		ldr	r3, .L31+8
+ 357 0020 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 358              		.loc 1 62 30 discriminator 1
+ 359 0022 0A2B     		cmp	r3, #10
+ 360 0024 14D1     		bne	.L26
+ 361              	.L25:
+  63:Application/source/console.c ****         rx_buffer[rx_index] = '\0';
+ 362              		.loc 1 63 18
+ 363 0026 274B     		ldr	r3, .L31+4
+ 364 0028 1B88     		ldrh	r3, [r3]	@ movhi
+ 365 002a 9BB2     		uxth	r3, r3
+ 366 002c 1A46     		mov	r2, r3
+ 367              		.loc 1 63 29
+ 368 002e 274B     		ldr	r3, .L31+12
+ 369 0030 0021     		movs	r1, #0
+ 370 0032 9954     		strb	r1, [r3, r2]
+  64:Application/source/console.c ****         rx_index = 0;
+ 371              		.loc 1 64 18
+ 372 0034 234B     		ldr	r3, .L31+4
+ 373 0036 0022     		movs	r2, #0
+ 374 0038 1A80     		strh	r2, [r3]	@ movhi
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 11
+
+
+  65:Application/source/console.c ****         rx_ready = 1;
+ 375              		.loc 1 65 18
+ 376 003a 254B     		ldr	r3, .L31+16
+ 377 003c 0122     		movs	r2, #1
+ 378 003e 1A70     		strb	r2, [r3]
+  66:Application/source/console.c ****         HAL_UART_Transmit(console_uart, (uint8_t *) "\r\n", 2, 10);
+ 379              		.loc 1 66 9
+ 380 0040 1F4B     		ldr	r3, .L31
+ 381 0042 1868     		ldr	r0, [r3]
+ 382 0044 0A23     		movs	r3, #10
+ 383 0046 0222     		movs	r2, #2
+ 384 0048 2249     		ldr	r1, .L31+20
+ 385 004a FFF7FEFF 		bl	HAL_UART_Transmit
+ 386 004e 2AE0     		b	.L27
+ 387              	.L26:
+  67:Application/source/console.c ****     }
+  68:Application/source/console.c ****     else {
+  69:Application/source/console.c ****         if (rx_temp_char == '\b' && rx_index > 0) {
+ 388              		.loc 1 69 26
+ 389 0050 1D4B     		ldr	r3, .L31+8
+ 390 0052 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 391              		.loc 1 69 12
+ 392 0054 082B     		cmp	r3, #8
+ 393 0056 13D1     		bne	.L28
+ 394              		.loc 1 69 46 discriminator 1
+ 395 0058 1A4B     		ldr	r3, .L31+4
+ 396 005a 1B88     		ldrh	r3, [r3]	@ movhi
+ 397 005c 9BB2     		uxth	r3, r3
+ 398              		.loc 1 69 34 discriminator 1
+ 399 005e 002B     		cmp	r3, #0
+ 400 0060 0ED0     		beq	.L28
+  70:Application/source/console.c ****             rx_index--;
+ 401              		.loc 1 70 21
+ 402 0062 184B     		ldr	r3, .L31+4
+ 403 0064 1B88     		ldrh	r3, [r3]	@ movhi
+ 404 0066 9BB2     		uxth	r3, r3
+ 405 0068 013B     		subs	r3, r3, #1
+ 406 006a 9AB2     		uxth	r2, r3
+ 407 006c 154B     		ldr	r3, .L31+4
+ 408 006e 1A80     		strh	r2, [r3]	@ movhi
+  71:Application/source/console.c ****             HAL_UART_Transmit(console_uart, (uint8_t *) "\b \b", 3, 10);
+ 409              		.loc 1 71 13
+ 410 0070 134B     		ldr	r3, .L31
+ 411 0072 1868     		ldr	r0, [r3]
+ 412 0074 0A23     		movs	r3, #10
+ 413 0076 0322     		movs	r2, #3
+ 414 0078 1749     		ldr	r1, .L31+24
+ 415 007a FFF7FEFF 		bl	HAL_UART_Transmit
+ 416 007e 12E0     		b	.L27
+ 417              	.L28:
+  72:Application/source/console.c ****         }
+  73:Application/source/console.c ****         else {
+  74:Application/source/console.c ****             rx_buffer[rx_index++] = rx_temp_char;
+ 418              		.loc 1 74 31
+ 419 0080 104B     		ldr	r3, .L31+4
+ 420 0082 1B88     		ldrh	r3, [r3]	@ movhi
+ 421 0084 9BB2     		uxth	r3, r3
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 12
+
+
+ 422 0086 5A1C     		adds	r2, r3, #1
+ 423 0088 91B2     		uxth	r1, r2
+ 424 008a 0E4A     		ldr	r2, .L31+4
+ 425 008c 1180     		strh	r1, [r2]	@ movhi
+ 426 008e 1A46     		mov	r2, r3
+ 427              		.loc 1 74 35
+ 428 0090 0D4B     		ldr	r3, .L31+8
+ 429 0092 1978     		ldrb	r1, [r3]	@ zero_extendqisi2
+ 430 0094 0D4B     		ldr	r3, .L31+12
+ 431 0096 9954     		strb	r1, [r3, r2]
+  75:Application/source/console.c ****             HAL_UART_Transmit(console_uart, (uint8_t *) &rx_temp_char, 1, 10);
+ 432              		.loc 1 75 13
+ 433 0098 094B     		ldr	r3, .L31
+ 434 009a 1868     		ldr	r0, [r3]
+ 435 009c 0A23     		movs	r3, #10
+ 436 009e 0122     		movs	r2, #1
+ 437 00a0 0949     		ldr	r1, .L31+8
+ 438 00a2 FFF7FEFF 		bl	HAL_UART_Transmit
+ 439              	.L27:
+  76:Application/source/console.c ****         }
+  77:Application/source/console.c ****     }
+  78:Application/source/console.c **** 
+  79:Application/source/console.c ****     HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_temp_char, 1);
+ 440              		.loc 1 79 5
+ 441 00a6 064B     		ldr	r3, .L31
+ 442 00a8 1B68     		ldr	r3, [r3]
+ 443 00aa 0122     		movs	r2, #1
+ 444 00ac 0649     		ldr	r1, .L31+8
+ 445 00ae 1846     		mov	r0, r3
+ 446 00b0 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 447 00b4 02E0     		b	.L21
+ 448              	.L29:
+  55:Application/source/console.c ****     }
+ 449              		.loc 1 55 9
+ 450 00b6 00BF     		nop
+ 451 00b8 00E0     		b	.L21
+ 452              	.L30:
+  59:Application/source/console.c ****     }
+ 453              		.loc 1 59 9
+ 454 00ba 00BF     		nop
+ 455              	.L21:
+  80:Application/source/console.c **** }
+ 456              		.loc 1 80 1
+ 457 00bc 80BD     		pop	{r7, pc}
+ 458              	.L32:
+ 459 00be 00BF     		.align	2
+ 460              	.L31:
+ 461 00c0 00000000 		.word	console_uart
+ 462 00c4 00000000 		.word	rx_index
+ 463 00c8 00000000 		.word	rx_temp_char
+ 464 00cc 00000000 		.word	rx_buffer
+ 465 00d0 00000000 		.word	rx_ready
+ 466 00d4 00000000 		.word	.LC0
+ 467 00d8 04000000 		.word	.LC1
+ 468              		.cfi_endproc
+ 469              	.LFE68:
+ 471              		.section	.text.HAL_UART_RxCpltCallback,"ax",%progbits
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 13
+
+
+ 472              		.align	1
+ 473              		.global	HAL_UART_RxCpltCallback
+ 474              		.syntax unified
+ 475              		.thumb
+ 476              		.thumb_func
+ 478              	HAL_UART_RxCpltCallback:
+ 479              	.LFB69:
+  81:Application/source/console.c **** 
+  82:Application/source/console.c **** void HAL_UART_RxCpltCallback(UART_HandleTypeDef *uart) {
+ 480              		.loc 1 82 56
+ 481              		.cfi_startproc
+ 482              		@ args = 0, pretend = 0, frame = 8
+ 483              		@ frame_needed = 1, uses_anonymous_args = 0
+ 484 0000 80B5     		push	{r7, lr}
+ 485              	.LCFI17:
+ 486              		.cfi_def_cfa_offset 8
+ 487              		.cfi_offset 7, -8
+ 488              		.cfi_offset 14, -4
+ 489 0002 82B0     		sub	sp, sp, #8
+ 490              	.LCFI18:
+ 491              		.cfi_def_cfa_offset 16
+ 492 0004 00AF     		add	r7, sp, #0
+ 493              	.LCFI19:
+ 494              		.cfi_def_cfa_register 7
+ 495 0006 7860     		str	r0, [r7, #4]
+  83:Application/source/console.c ****     if (console_uart != NULL && uart == console_uart) {
+ 496              		.loc 1 83 22
+ 497 0008 074B     		ldr	r3, .L36
+ 498 000a 1B68     		ldr	r3, [r3]
+ 499              		.loc 1 83 8
+ 500 000c 002B     		cmp	r3, #0
+ 501 000e 06D0     		beq	.L35
+ 502              		.loc 1 83 38 discriminator 1
+ 503 0010 054B     		ldr	r3, .L36
+ 504 0012 1B68     		ldr	r3, [r3]
+ 505              		.loc 1 83 30 discriminator 1
+ 506 0014 7A68     		ldr	r2, [r7, #4]
+ 507 0016 9A42     		cmp	r2, r3
+ 508 0018 01D1     		bne	.L35
+  84:Application/source/console.c ****         console_rx_callback();
+ 509              		.loc 1 84 9
+ 510 001a FFF7FEFF 		bl	console_rx_callback
+ 511              	.L35:
+  85:Application/source/console.c ****     }
+  86:Application/source/console.c **** }...
+ 512              		.loc 1 86 1
+ 513 001e 00BF     		nop
+ 514 0020 0837     		adds	r7, r7, #8
+ 515              	.LCFI20:
+ 516              		.cfi_def_cfa_offset 8
+ 517 0022 BD46     		mov	sp, r7
+ 518              	.LCFI21:
+ 519              		.cfi_def_cfa_register 13
+ 520              		@ sp needed
+ 521 0024 80BD     		pop	{r7, pc}
+ 522              	.L37:
+ 523 0026 00BF     		.align	2
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 14
+
+
+ 524              	.L36:
+ 525 0028 00000000 		.word	console_uart
+ 526              		.cfi_endproc
+ 527              	.LFE69:
+ 529              		.text
+ 530              	.Letext0:
+ 531              		.file 3 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/arm-none-eabi/include/machine/_defa
+ 532              		.file 4 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/arm-none-eabi/include/sys/_stdint.h
+ 533              		.file 5 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 534              		.file 6 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/14.3.1/includ
+ 535              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h"
+ 536              		.file 8 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h"
+ 537              		.file 9 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h"
+ 538              		.file 10 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/arm-none-eabi/include/string.h"
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s 			page 15
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 console.c
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:19     .bss.console_uart:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:22     .bss.console_uart:00000000 console_uart
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:27     .bss.rx_byte:00000000 rx_byte
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:28     .bss.rx_byte:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:32     .bss.rx_ready:00000000 rx_ready
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:33     .bss.rx_ready:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:35     .bss.rx_index:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:38     .bss.rx_index:00000000 rx_index
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:41     .bss.rx_buffer:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:44     .bss.rx_buffer:00000000 rx_buffer
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:49     .bss.rx_temp_char:00000000 rx_temp_char
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:50     .bss.rx_temp_char:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:52     .text.console_init:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:58     .text.console_init:00000000 console_init
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:118    .text.console_init:00000038 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:124    .text.console_print:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:130    .text.console_print:00000000 console_print
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:204    .text.console_print:00000054 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:209    .text.console_read:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:215    .text.console_read:00000000 console_read
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:304    .text.console_read:00000044 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:310    .rodata:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:317    .text.console_rx_callback:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:322    .text.console_rx_callback:00000000 console_rx_callback
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:461    .text.console_rx_callback:000000c0 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:472    .text.HAL_UART_RxCpltCallback:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:478    .text.HAL_UART_RxCpltCallback:00000000 HAL_UART_RxCpltCallback
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccJexsvi.s:525    .text.HAL_UART_RxCpltCallback:00000028 $d
+
+UNDEFINED SYMBOLS
+HAL_UART_Receive_IT
+strlen
+HAL_UART_Transmit_IT
+HAL_UART_GetState
+strcpy
+HAL_UART_Transmit

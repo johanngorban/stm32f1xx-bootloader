@@ -1,0 +1,186 @@
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"menu_handlers.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Application/source/menu_handlers.c"
+  18              		.section	.rodata
+  19              		.align	2
+  20              	.LC0:
+  21 0000 5265626F 		.ascii	"Rebooting...\015\012\000"
+  21      6F74696E 
+  21      672E2E2E 
+  21      0D0A00
+  22              		.section	.text.rebootSystem,"ax",%progbits
+  23              		.align	1
+  24              		.global	rebootSystem
+  25              		.syntax unified
+  26              		.thumb
+  27              		.thumb_func
+  29              	rebootSystem:
+  30              	.LFB65:
+   1:Application/source/menu_handlers.c **** #include "menu_handlers.h"
+   2:Application/source/menu_handlers.c **** #include "console.h"
+   3:Application/source/menu_handlers.c **** #include "menu.h"
+   4:Application/source/menu_handlers.c **** 
+   5:Application/source/menu_handlers.c **** uint8_t rebootSystem() {
+  31              		.loc 1 5 24
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 1, uses_anonymous_args = 0
+  35 0000 80B5     		push	{r7, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 00AF     		add	r7, sp, #0
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_register 7
+   6:Application/source/menu_handlers.c ****     console_print("Rebooting...\r\n");
+  43              		.loc 1 6 5
+  44 0004 0248     		ldr	r0, .L3
+  45 0006 FFF7FEFF 		bl	console_print
+   7:Application/source/menu_handlers.c ****     return 0;
+  46              		.loc 1 7 12
+  47 000a 0023     		movs	r3, #0
+   8:Application/source/menu_handlers.c **** }
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s 			page 2
+
+
+  48              		.loc 1 8 1
+  49 000c 1846     		mov	r0, r3
+  50 000e 80BD     		pop	{r7, pc}
+  51              	.L4:
+  52              		.align	2
+  53              	.L3:
+  54 0010 00000000 		.word	.LC0
+  55              		.cfi_endproc
+  56              	.LFE65:
+  58              		.section	.text.helpCommand,"ax",%progbits
+  59              		.align	1
+  60              		.global	helpCommand
+  61              		.syntax unified
+  62              		.thumb
+  63              		.thumb_func
+  65              	helpCommand:
+  66              	.LFB66:
+   9:Application/source/menu_handlers.c **** 
+  10:Application/source/menu_handlers.c **** uint8_t helpCommand() {
+  67              		.loc 1 10 23
+  68              		.cfi_startproc
+  69              		@ args = 0, pretend = 0, frame = 0
+  70              		@ frame_needed = 1, uses_anonymous_args = 0
+  71 0000 80B5     		push	{r7, lr}
+  72              	.LCFI2:
+  73              		.cfi_def_cfa_offset 8
+  74              		.cfi_offset 7, -8
+  75              		.cfi_offset 14, -4
+  76 0002 00AF     		add	r7, sp, #0
+  77              	.LCFI3:
+  78              		.cfi_def_cfa_register 7
+  11:Application/source/menu_handlers.c ****     menu_print(console_print);
+  79              		.loc 1 11 5
+  80 0004 0248     		ldr	r0, .L7
+  81 0006 FFF7FEFF 		bl	menu_print
+  12:Application/source/menu_handlers.c ****     return 0;
+  82              		.loc 1 12 12
+  83 000a 0023     		movs	r3, #0
+  13:Application/source/menu_handlers.c **** }
+  84              		.loc 1 13 1
+  85 000c 1846     		mov	r0, r3
+  86 000e 80BD     		pop	{r7, pc}
+  87              	.L8:
+  88              		.align	2
+  89              	.L7:
+  90 0010 00000000 		.word	console_print
+  91              		.cfi_endproc
+  92              	.LFE66:
+  94              		.section	.rodata
+  95 000f 00       		.align	2
+  96              	.LC1:
+  97 0010 556E6B6E 		.ascii	"Unknown command\015\012\000"
+  97      6F776E20 
+  97      636F6D6D 
+  97      616E640D 
+  97      0A00
+  98              		.section	.text.unknownCommand,"ax",%progbits
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s 			page 3
+
+
+  99              		.align	1
+ 100              		.global	unknownCommand
+ 101              		.syntax unified
+ 102              		.thumb
+ 103              		.thumb_func
+ 105              	unknownCommand:
+ 106              	.LFB67:
+  14:Application/source/menu_handlers.c **** 
+  15:Application/source/menu_handlers.c **** uint8_t unknownCommand() {
+ 107              		.loc 1 15 26
+ 108              		.cfi_startproc
+ 109              		@ args = 0, pretend = 0, frame = 0
+ 110              		@ frame_needed = 1, uses_anonymous_args = 0
+ 111 0000 80B5     		push	{r7, lr}
+ 112              	.LCFI4:
+ 113              		.cfi_def_cfa_offset 8
+ 114              		.cfi_offset 7, -8
+ 115              		.cfi_offset 14, -4
+ 116 0002 00AF     		add	r7, sp, #0
+ 117              	.LCFI5:
+ 118              		.cfi_def_cfa_register 7
+  16:Application/source/menu_handlers.c ****     console_print("Unknown command\r\n");
+ 119              		.loc 1 16 5
+ 120 0004 0248     		ldr	r0, .L11
+ 121 0006 FFF7FEFF 		bl	console_print
+  17:Application/source/menu_handlers.c ****     return 0;
+ 122              		.loc 1 17 12
+ 123 000a 0023     		movs	r3, #0
+  18:Application/source/menu_handlers.c **** }...
+ 124              		.loc 1 18 1
+ 125 000c 1846     		mov	r0, r3
+ 126 000e 80BD     		pop	{r7, pc}
+ 127              	.L12:
+ 128              		.align	2
+ 129              	.L11:
+ 130 0010 10000000 		.word	.LC1
+ 131              		.cfi_endproc
+ 132              	.LFE67:
+ 134              		.text
+ 135              	.Letext0:
+ 136              		.file 2 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/arm-none-eabi/include/machine/_defa
+ 137              		.file 3 "/Applications/ArmGNUToolchain/14.3.rel1/arm-none-eabi/arm-none-eabi/include/sys/_stdint.h
+ 138              		.file 4 "Application/include/menu.h"
+ 139              		.file 5 "Application/include/console.h"
+ARM GAS  /var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 menu_handlers.c
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:19     .rodata:00000000 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:23     .text.rebootSystem:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:29     .text.rebootSystem:00000000 rebootSystem
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:54     .text.rebootSystem:00000010 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:59     .text.helpCommand:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:65     .text.helpCommand:00000000 helpCommand
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:90     .text.helpCommand:00000010 $d
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:99     .text.unknownCommand:00000000 $t
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:105    .text.unknownCommand:00000000 unknownCommand
+/var/folders/sb/5wbx477s1bdgzdppd6ypx7ym0000gn/T//ccRHX6Dm.s:130    .text.unknownCommand:00000010 $d
+
+UNDEFINED SYMBOLS
+console_print
+menu_print
