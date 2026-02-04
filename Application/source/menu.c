@@ -55,9 +55,6 @@ void menu_print(menu_printer_t print) {
     if (print == NULL) {
         return;
     }
-
-    print("\033[2J\033[H");
-    print("\033[10;20H");
     
     for (uint8_t i = 0; i < menu_command_count; i++) {
         // print("%s. %s\n", menu_entries[i].opcode, menu_entries[i].description);

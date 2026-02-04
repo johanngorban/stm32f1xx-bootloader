@@ -5,8 +5,8 @@
 #include <string.h>
 
 const static menu_entry_t menu_entries[] = {
-    {"?", "Display menu", helpCommand},
     {"Reboot", "Reboot system", rebootSystem},
+    {"?", "Display menu", displayMenu},
 };
 
 // static app_context_t *appContext = NULL;

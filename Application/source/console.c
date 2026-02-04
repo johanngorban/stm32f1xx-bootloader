@@ -35,6 +35,10 @@ void console_print(const char *str) {
     );
 }
 
+void console_clear() {
+    console_print("\033[2J");
+}
+
 uint8_t console_read(char *buffer) {
     if (buffer == NULL || rx_ready == 0) {
         return 0;
