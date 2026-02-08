@@ -57,7 +57,8 @@ Core/Src/syscalls.c \
 Application/source/menu_handlers.c \
 Application/source/menu.c \
 Application/source/console.c \
-Application/source/app.c
+Application/source/app.c \
+Application/source/ring_buffer.c
 
 # ASM sources
 ASM_SOURCES =  \

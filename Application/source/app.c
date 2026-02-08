@@ -21,15 +21,22 @@ void app_init(const app_context_t *ctx) {
 }
 
 void app_start() {
-    char consoleInput[CONSOLE_MAX_INPUT_DATA_LENGTH];
-    memset(consoleInput, 0, CONSOLE_MAX_INPUT_DATA_LENGTH);
+    uint32_t lastBlink = 0;
+
+    char consoleInput[CONSOLE_MAX_RX_DATA_LENGTH];
+    memset(consoleInput, 0, CONSOLE_MAX_RX_DATA_LENGTH);
+
+    console_clear();
 
     while(1) {
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-        HAL_Delay(500);
+        if (HAL_GetTick() - lastBlink >= 500) {
+            lastBlink = HAL_GetTick();
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        }
+        
+        console_poll();
 
-        uint8_t bytesReceived = console_read(consoleInput);
-        if (bytesReceived > 0) {
+        if (console_read(consoleInput) > 0) {
             menu_execute(consoleInput);
         }
     }

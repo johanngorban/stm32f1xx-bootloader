@@ -1,16 +1,23 @@
 #include "console.h"
+#include "ring_buffer.h"
 #include "stm32f1xx.h"
 
 #include <string.h>
 #include <stdint.h>
 
 static UART_HandleTypeDef *console_uart = NULL;
+static char line_buffer[CONSOLE_MAX_RX_DATA_LENGTH];
+static uint16_t line_len = 0;
 
+// TX Buffer
+static ring_buffer_t tx_buffer;
+static volatile uint8_t tx_busy = 0;
+static volatile uint8_t tx_byte;
+
+// RX Buffer
+static ring_buffer_t rx_buffer;
 static volatile uint8_t rx_byte;
 static volatile uint8_t rx_ready = 0;
-static volatile uint16_t rx_index = 0;
-static char rx_buffer[CONSOLE_MAX_INPUT_DATA_LENGTH];
-static char rx_temp_char;
 
 uint8_t console_init(UART_HandleTypeDef *huart) {
     if (huart == NULL || console_uart != NULL) {
@@ -19,7 +26,13 @@ uint8_t console_init(UART_HandleTypeDef *huart) {
 
     console_uart = huart;
 
-    HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_temp_char, 1);
+    ring_buffer_init(&tx_buffer);
+    tx_busy = 0;    
+
+    ring_buffer_init(&rx_buffer);
+    rx_ready = 0;
+
+    HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_byte, 1);
     return 0;
 }
 
@@ -27,16 +40,39 @@ void console_print(const char *str) {
     if (str == NULL) {
         return;
     }
+    HAL_UART_Transmit(console_uart, (uint8_t *) str, strlen(str), 10);
+    // ring_buffer_write(&tx_buffer, (uint8_t *) str, strlen(str));
 
-    HAL_UART_Transmit_IT(console_uart, (uint8_t *) str, strlen(str));
-    while (
-        HAL_UART_GetState(console_uart) == HAL_UART_STATE_BUSY_TX ||
-        HAL_UART_GetState(console_uart) == HAL_UART_STATE_BUSY_TX_RX
-    );
+    // if (tx_busy == 0) {
+    //     tx_busy = 1;
+    //     tx_byte = ring_buffer_pop_front(&tx_buffer);
+    //     HAL_UART_Transmit_IT(console_uart, &tx_byte, 1);
+    // }
 }
 
 void console_clear() {
-    console_print("\033[2J");
+    console_print("\033[2J\033[H");
+}
+
+void console_poll(void) {
+    while (ring_buffer_get_length(&rx_buffer) > 0) {
+        uint8_t ch = ring_buffer_pop_front(&rx_buffer);
+        if ((ch == '\b' || ch == 0x7F) && line_len > 0) {
+            line_len--;
+            console_print("\b \b");
+        }
+        else if (ch == '\r' || ch == '\n') {
+            line_buffer[line_len] = '\0';
+            rx_ready = 1;
+            console_print("\r\n");
+            return;
+        }
+        else if (line_len < sizeof(line_buffer) - 1) {
+            line_buffer[line_len++] = ch;
+            char echo[2] = {ch, 0};
+            console_print(echo);
+        }
+    }
 }
 
 uint8_t console_read(char *buffer) {
@@ -44,47 +80,39 @@ uint8_t console_read(char *buffer) {
         return 0;
     }
 
-    __disable_irq();
+    if (line_len > 0) {
+        strcpy(buffer, line_buffer);
+        rx_ready = 0;
+        line_len = 0;
+        line_buffer[0] = '\0';
+    }
+    
+    return line_len;
+}
 
-    strcpy(buffer, rx_buffer);
-    rx_ready = 0;
-
-    __enable_irq();
-
-    return strlen(buffer);
+static void console_tx_callback() {
+    if (ring_buffer_get_length(&tx_buffer) == 0) {
+        tx_busy = 0;
+    }
+    else {
+        tx_byte = ring_buffer_pop_front(&tx_buffer);
+        HAL_UART_Transmit_IT(console_uart, &tx_byte, 1);
+    }
 }
 
 static void console_rx_callback() {
-    if (console_uart == NULL) {
-        return;
-    }
+    ring_buffer_push_back(&rx_buffer, rx_byte);
+    HAL_UART_Receive_IT(console_uart, &rx_byte, 1);
+}
 
-    if (rx_index >= CONSOLE_MAX_INPUT_DATA_LENGTH - 1) {
-        return;
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *uart) {
+    if (uart == console_uart) {
+        console_tx_callback();
     }
-
-    if (rx_temp_char == '\r' || rx_temp_char == '\n') {
-        rx_buffer[rx_index] = '\0';
-        rx_index = 0;
-        rx_ready = 1;
-        HAL_UART_Transmit(console_uart, (uint8_t *) "\r\n", 2, 10);
-    }
-    else {
-        if (rx_temp_char == '\b' && rx_index > 0) {
-            rx_index--;
-            HAL_UART_Transmit(console_uart, (uint8_t *) "\b \b", 3, 10);
-        }
-        else {
-            rx_buffer[rx_index++] = rx_temp_char;
-            HAL_UART_Transmit(console_uart, (uint8_t *) &rx_temp_char, 1, 10);
-        }
-    }
-
-    HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_temp_char, 1);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *uart) {
-    if (console_uart != NULL && uart == console_uart) {
+    if (uart == console_uart) {
         console_rx_callback();
     }
 }
