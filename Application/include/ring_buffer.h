@@ -16,13 +16,11 @@ uint16_t ring_buffer_get_length(const ring_buffer_t *buffer);
 
 uint16_t ring_buffer_get_freespace(const ring_buffer_t *buffer);
 
-char ring_buffer_pop_back(ring_buffer_t *buffer);
+uint8_t ring_buffer_pop(ring_buffer_t *buffer);
 
-char ring_buffer_pop_front(ring_buffer_t *buffer);
-
-void ring_buffer_push_back(
+void ring_buffer_push(
     ring_buffer_t *buffer,
-    char ch
+    uint8_t byte
 );
 
 uint16_t ring_buffer_read(

@@ -8,6 +8,10 @@ uint16_t ring_buffer_get_freespace(const ring_buffer_t *buffer) {
         return RING_BUFFER_MAX_LENGTH - 1;
     }
 
+    if ((buffer->head + 1) % RING_BUFFER_MAX_LENGTH == buffer->tail) {
+        return 0;
+    }
+
     if (buffer->head > buffer->tail) {
         return RING_BUFFER_MAX_LENGTH - (buffer->head - buffer->tail + 1);
     }
@@ -29,16 +33,7 @@ void ring_buffer_init(ring_buffer_t *buffer) {
     memset(buffer->data, 0, RING_BUFFER_MAX_LENGTH);
 }
 
-char ring_buffer_pop_back(ring_buffer_t *buffer) {
-    if (buffer == NULL || ring_buffer_get_length(buffer) == 0) {
-        return '\0';
-    }
-
-    buffer->head = (buffer->head + RING_BUFFER_MAX_LENGTH - 1) % RING_BUFFER_MAX_LENGTH;
-    return buffer->data[buffer->head];
-}
-
-char ring_buffer_pop_front(ring_buffer_t *buffer) {
+uint8_t ring_buffer_pop(ring_buffer_t *buffer) {
     if (buffer == NULL) {
         return '\0';
     }
@@ -47,20 +42,21 @@ char ring_buffer_pop_front(ring_buffer_t *buffer) {
         return '\0';
     }
 
-    char ch = buffer->data[buffer->tail];
+    char byte = buffer->data[buffer->tail];
     buffer->tail = (buffer->tail + 1) % RING_BUFFER_MAX_LENGTH;
-    return ch;
+    return byte;
 }
 
-void ring_buffer_push_back(
+void ring_buffer_push(
     ring_buffer_t *buffer,
-    char ch
+    uint8_t byte
 ) {
     if (buffer == NULL || ring_buffer_get_freespace(buffer) == 0) {
         return;
     }
 
-    buffer->data[buffer->head++] = ch;
+    buffer->data[buffer->head] = byte;
+    buffer->head = (buffer->head + 1) % RING_BUFFER_MAX_LENGTH;
 }
 
 uint16_t ring_buffer_read(
@@ -81,11 +77,12 @@ uint16_t ring_buffer_read(
 
     if (buffer->head > buffer->tail) {
         memcpy(data, buffer->data + buffer->tail, length);
+        buffer->tail = (buffer->tail + length) % RING_BUFFER_MAX_LENGTH;
         read_bytes = length;
     }
     else {
         while (buffer->tail != buffer->head && read_bytes < length) {
-            ch = ring_buffer_pop_front(buffer);
+            ch = ring_buffer_pop(buffer);
             data[read_bytes++] = ch;
         }
     }
@@ -114,20 +111,25 @@ uint16_t ring_buffer_write(
         return 0;
     }
 
-    if (buffer->tail < buffer->head) {
-        memcpy(buffer->data + buffer->head, data, length);
-        buffer->head += (buffer->head + length) % RING_BUFFER_MAX_LENGTH;
+    uint16_t bytes_written = 0;
+    while (bytes_written < length) {
+        ring_buffer_push(buffer, data[bytes_written++]);
     }
-    else {
-        uint16_t bytes_written = 0;
-        while (bytes_written < length) {
-            ring_buffer_push_back(buffer, data[bytes_written++]);
-        }
-        // memcpy(buffer->data + buffer->head, data, RING_BUFFER_MAX_LENGTH - buffer->head);
-        // uint16_t old_head = buffer->head;
-        // buffer->head += (buffer->head + length) % RING_BUFFER_MAX_LENGTH;
-        // memcpy(buffer->data + buffer->head, data + old_head, length + old_head - RING_BUFFER_MAX_LENGTH);
-    }
+
+    // if (buffer->tail < buffer->head) {
+    //     memcpy(buffer->data + buffer->head, data, length);
+    //     buffer->head = (buffer->head + length) % RING_BUFFER_MAX_LENGTH;
+    // }
+    // else {
+    //     uint16_t bytes_written = 0;
+    //     while (bytes_written < length) {
+    //         ring_buffer_push(buffer, data[bytes_written++]);
+    //     }
+    //     // memcpy(buffer->data + buffer->head, data, RING_BUFFER_MAX_LENGTH - buffer->head);
+    //     // uint16_t old_head = buffer->head;
+    //     // buffer->head += (buffer->head + length) % RING_BUFFER_MAX_LENGTH;
+    //     // memcpy(buffer->data + buffer->head, data + old_head, length + old_head - RING_BUFFER_MAX_LENGTH);
+    // }
 
     return length;
 }

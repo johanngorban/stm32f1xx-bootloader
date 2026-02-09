@@ -16,7 +16,7 @@ void app_init(const app_context_t *ctx) {
         return;
     }
 
-    console_init(ctx->consoleUart);    
+    console_init(ctx->consoleUart, ctx->consoleIRQn);    
     menu_init(menu_entries, 2, unknownCommand);
 }
 
@@ -36,7 +36,8 @@ void app_start() {
         
         console_poll();
 
-        if (console_read(consoleInput) > 0) {
+        if (console_ready() == 1) {
+            console_read(consoleInput);
             menu_execute(consoleInput);
         }
     }

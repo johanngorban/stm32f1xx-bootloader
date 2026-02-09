@@ -3,7 +3,8 @@
 #include "stm32f1xx_hal.h"
 
 typedef struct {
-    UART_HandleTypeDef *consoleUart
+    UART_HandleTypeDef *consoleUart;
+    IRQn_Type consoleIRQn;
 } app_context_t;
 
 void app_init(const app_context_t *ctx);
