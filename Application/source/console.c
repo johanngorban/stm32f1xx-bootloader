@@ -20,6 +20,9 @@ static ring_buffer_t rx_buffer;
 static volatile uint8_t rx_byte;
 static volatile uint8_t rx_ready = 0;
 
+static void console_rx_callback(UART_HandleTypeDef *);
+static void console_tx_callback(UART_HandleTypeDef *);
+
 uint8_t console_init(UART_HandleTypeDef *huart, IRQn_Type irq_n) {
     if (huart == NULL || console_uart != NULL) {
         return 1;
@@ -33,6 +36,18 @@ uint8_t console_init(UART_HandleTypeDef *huart, IRQn_Type irq_n) {
 
     ring_buffer_init(&rx_buffer);
     rx_ready = 0;
+
+    HAL_UART_RegisterCallback(
+        console_uart,
+        HAL_UART_RX_COMPLETE_CB_ID,
+        console_rx_callback
+    );
+
+    HAL_UART_RegisterCallback(
+        console_uart,
+        HAL_UART_TX_COMPLETE_CB_ID,
+        console_tx_callback
+    );
 
     HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_byte, 1);
     return 0;
@@ -89,7 +104,7 @@ void console_read(char *buffer) {
     line_buffer[0] = '\0';
 }
 
-static void console_tx_callback() {
+static void console_tx_callback(UART_HandleTypeDef *console) {
     if (ring_buffer_get_length(&tx_buffer) == 0) {
         tx_busy = 0;
     }
@@ -99,19 +114,7 @@ static void console_tx_callback() {
     }
 }
 
-static void console_rx_callback() {
+static void console_rx_callback(UART_HandleTypeDef *console) {
     ring_buffer_push(&rx_buffer, rx_byte);
     HAL_UART_Receive_IT(console_uart, &rx_byte, 1);
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *uart) {
-    if (uart == console_uart) {
-        console_tx_callback();
-    }
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *uart) {
-    if (uart == console_uart) {
-        console_rx_callback();
-    }
 }
