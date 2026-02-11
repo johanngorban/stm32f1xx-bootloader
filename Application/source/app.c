@@ -16,15 +16,15 @@ void app_init(const app_context_t *ctx) {
         return;
     }
 
-    console_init(ctx->consoleUart, ctx->consoleIRQn);    
+    console_init(ctx->consoleUart);    
     menu_init(menu_entries, 2, unknownCommand);
 }
 
 void app_start() {
     uint32_t lastBlink = 0;
 
-    char consoleInput[CONSOLE_MAX_RX_DATA_LENGTH];
-    memset(consoleInput, 0, CONSOLE_MAX_RX_DATA_LENGTH);
+    char consoleBuffer[CONSOLE_MAX_RX_DATA_LENGTH];
+    memset(consoleBuffer, 0, CONSOLE_MAX_RX_DATA_LENGTH);
 
     console_clear();
 
@@ -33,12 +33,8 @@ void app_start() {
             lastBlink = HAL_GetTick();
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
         }
-        
-        console_poll();
 
-        if (console_ready() == 1) {
-            console_read(consoleInput);
-            menu_execute(consoleInput);
-        }
+        console_read(consoleBuffer, 1);
+        menu_execute(consoleBuffer);
     }
 }
