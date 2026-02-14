@@ -13,6 +13,8 @@ typedef struct {
 
 void ring_buffer_init(ring_buffer_t *buffer);
 
+void ring_buffer_clear(ring_buffer_t *buffer);
+
 uint16_t ring_buffer_get_length(const ring_buffer_t *buffer);
 
 uint16_t ring_buffer_get_freespace(const ring_buffer_t *buffer);

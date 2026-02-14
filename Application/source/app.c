@@ -35,7 +35,9 @@ void app_start() {
         }
 
         if (console_gets(consoleInput)) {
-            menu_execute(consoleInput);
+            // menu_execute(consoleInput);
+            console_clear();
+            console_puts(consoleInput);
         }
     }
 }

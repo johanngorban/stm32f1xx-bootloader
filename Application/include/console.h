@@ -7,12 +7,8 @@
 
 uint8_t console_init(UART_HandleTypeDef *huart);
 
-void console_poll();
-
 void console_puts(const char *str);
 
 void console_clear();
-
-uint8_t console_ready();
 
 uint16_t console_gets(char *buffer);

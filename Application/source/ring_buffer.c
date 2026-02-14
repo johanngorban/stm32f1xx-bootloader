@@ -26,6 +26,17 @@ void ring_buffer_init(ring_buffer_t *buffer) {
     memset(buffer->data, 0, RING_BUFFER_MAX_LENGTH);
 }
 
+void ring_buffer_clear(ring_buffer_t *buffer) {
+    if (buffer == NULL) {
+        return;
+    }
+
+    buffer->head = 0;
+    buffer->tail = 0;
+    buffer->len = 0;
+    memset(buffer->data, 0, RING_BUFFER_MAX_LENGTH);
+}
+
 uint8_t ring_buffer_pop_back(ring_buffer_t *buffer) {
     if (buffer == NULL) {
         return '\0';
@@ -35,9 +46,9 @@ uint8_t ring_buffer_pop_back(ring_buffer_t *buffer) {
         return '\0';
     }
 
-    char byte = buffer->data[buffer->head];
-    buffer->len--;
     buffer->head = (buffer->head + RING_BUFFER_MAX_LENGTH - 1) % RING_BUFFER_MAX_LENGTH;
+    uint8_t byte = buffer->data[buffer->head];
+    buffer->len--;
 
     return byte;
 }

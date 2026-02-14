@@ -37,6 +37,8 @@ uint8_t console_init(UART_HandleTypeDef *huart) {
     ring_buffer_init(&rx_buffer);
     rx_ready = 0;
 
+    ring_buffer_init(&console_buffer);
+
     HAL_UART_RegisterCallback(
         console_uart,
         HAL_UART_RX_COMPLETE_CB_ID,
@@ -65,24 +67,21 @@ void console_clear() {
     console_puts("\033[2J\033[H");
 }
 
-uint8_t console_ready() {
-    return rx_ready;
-}
-
 uint16_t console_gets(char *buffer) {
     if (buffer == NULL) {
         return 0;
     }
 
     if (rx_ready == 1) {
-        ring_buffer_read(
-            &console_buffer,
-            (uint8_t *) buffer,
-            console_buffer.len
-        );
-        buffer[console_buffer.len] = '\0';
+        uint16_t length = ring_buffer_get_length(&console_buffer);
+        ring_buffer_read(&console_buffer, (uint8_t *) buffer, length);
+        
+        buffer[length] = '\0';
+        ring_buffer_clear(&console_buffer);
+
         rx_ready = 0;
-        return console_buffer.len;
+
+        return length;
     }
 
     while (ring_buffer_get_length(&rx_buffer) > 0) {
@@ -98,7 +97,7 @@ uint16_t console_gets(char *buffer) {
             }
         }
         else if (ch >= 32 && ch <= 126) {
-            if (ring_buffer_get_length(&console_buffer) <= CONSOLE_MAX_RX_DATA_LENGTH) {
+            if (ring_buffer_get_length(&console_buffer) < CONSOLE_MAX_RX_DATA_LENGTH - 1) {
                 ring_buffer_push(&console_buffer, ch);
                 console_putc(ch);
             }
