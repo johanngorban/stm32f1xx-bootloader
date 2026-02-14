@@ -6,8 +6,9 @@
 
 typedef struct {
     uint8_t data[RING_BUFFER_MAX_LENGTH];
-    uint16_t head;
-    uint16_t tail;
+    volatile uint16_t head;
+    volatile uint16_t tail;
+    volatile uint16_t len;
 } ring_buffer_t;
 
 void ring_buffer_init(ring_buffer_t *buffer);
@@ -15,6 +16,8 @@ void ring_buffer_init(ring_buffer_t *buffer);
 uint16_t ring_buffer_get_length(const ring_buffer_t *buffer);
 
 uint16_t ring_buffer_get_freespace(const ring_buffer_t *buffer);
+
+uint8_t ring_buffer_pop_back(ring_buffer_t *buffer);
 
 uint8_t ring_buffer_pop(ring_buffer_t *buffer);
 

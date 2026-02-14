@@ -4,7 +4,6 @@
 
 typedef struct {
     UART_HandleTypeDef *consoleUart;
-    IRQn_Type consoleIRQn;
 } app_context_t;
 
 void app_init(const app_context_t *ctx);

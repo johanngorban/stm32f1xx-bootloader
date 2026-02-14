@@ -4,11 +4,13 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <ctype.h>
 
 static UART_HandleTypeDef *console_uart = NULL;
-static IRQn_Type console_uart_irq_n;
-static char line_buffer[CONSOLE_MAX_RX_DATA_LENGTH];
-static uint16_t line_len = 0;
+
+// Terminal buffer
+static ring_buffer_t console_buffer;
+static volatile uint8_t rx_ready = 0;
 
 // TX Buffer
 static ring_buffer_t tx_buffer;
@@ -18,18 +20,16 @@ static volatile uint8_t tx_byte;
 // RX Buffer
 static ring_buffer_t rx_buffer;
 static volatile uint8_t rx_byte;
-static volatile uint8_t rx_ready = 0;
 
 static void console_rx_callback(UART_HandleTypeDef *);
 static void console_tx_callback(UART_HandleTypeDef *);
 
-uint8_t console_init(UART_HandleTypeDef *huart, IRQn_Type irq_n) {
+uint8_t console_init(UART_HandleTypeDef *huart) {
     if (huart == NULL || console_uart != NULL) {
         return 1;
     }
 
     console_uart = huart;
-    console_uart_irq_n = irq_n;
 
     ring_buffer_init(&tx_buffer);
     tx_busy = 0;    
@@ -53,55 +53,59 @@ uint8_t console_init(UART_HandleTypeDef *huart, IRQn_Type irq_n) {
     return 0;
 }
 
-void console_print(const char *str) {
-    HAL_UART_Transmit(console_uart, (uint8_t *) str, strlen(str), 10);
-    // ring_buffer_write(&tx_buffer, (uint8_t *) str, strlen(str));
+void console_putc(char c) {
+    HAL_UART_Transmit(console_uart, (uint8_t *) &c, 1, 10);
+}
 
-    // if (tx_busy == 0) {
-    //     tx_busy = 1;
-    //     tx_byte = ring_buffer_pop(&tx_buffer);
-    //     HAL_UART_Transmit_IT(console_uart, &tx_byte, 1);
-    // }
+void console_puts(const char *str) {
+    HAL_UART_Transmit(console_uart, (uint8_t *) str, strlen(str), 10);
 }
 
 void console_clear() {
-    console_print("\033[2J\033[H");
-}
-
-void console_poll(void) {
-    while (ring_buffer_get_length(&rx_buffer) > 0 && rx_ready == 0) {
-        uint8_t ch = ring_buffer_pop(&rx_buffer);
-        if ((ch == '\b' || ch == 0x7F) && line_len > 0) {
-            line_len--;
-            console_print("\b \b");
-        }
-        else if (ch == '\r' || ch == '\n') {
-            line_buffer[line_len] = '\0';
-            rx_ready = 1;
-            console_print("\r\n");
-            return;
-        }
-        else if (line_len < CONSOLE_MAX_RX_DATA_LENGTH - 1) {
-            line_buffer[line_len++] = ch;
-            char echo[2] = {ch, 0};
-            console_print(echo);
-        }
-    }
+    console_puts("\033[2J\033[H");
 }
 
 uint8_t console_ready() {
     return rx_ready;
 }
 
-void console_read(char *buffer) {
-    if (buffer == NULL || rx_ready == 0) {
-        return;
+uint16_t console_gets(char *buffer) {
+    if (buffer == NULL) {
+        return 0;
     }
-    
-    strcpy(buffer, line_buffer);
-    rx_ready = 0;
-    line_len = 0;
-    line_buffer[0] = '\0';
+
+    if (rx_ready == 1) {
+        ring_buffer_read(
+            &console_buffer,
+            (uint8_t *) buffer,
+            console_buffer.len
+        );
+        buffer[console_buffer.len] = '\0';
+        rx_ready = 0;
+        return console_buffer.len;
+    }
+
+    while (ring_buffer_get_length(&rx_buffer) > 0) {
+        char ch = ring_buffer_pop(&rx_buffer);
+        if (ch == '\r' || ch == '\n') {
+            rx_ready = 1;
+            console_puts("\r\n");
+        }
+        else if (ch == '\b') {
+            if (ring_buffer_get_length(&console_buffer) > 0) {
+                ring_buffer_pop_back(&console_buffer);
+                console_puts("\b \b");
+            }
+        }
+        else if (ch >= 32 && ch <= 126) {
+            if (ring_buffer_get_length(&console_buffer) <= CONSOLE_MAX_RX_DATA_LENGTH) {
+                ring_buffer_push(&console_buffer, ch);
+                console_putc(ch);
+            }
+        }
+    }
+
+    return 0;
 }
 
 static void console_tx_callback(UART_HandleTypeDef *console) {

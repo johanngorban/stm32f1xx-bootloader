@@ -5,18 +5,18 @@
 
 uint8_t rebootSystem() {
     console_clear();
-    console_print("Rebooting...\r\n");
+    console_puts("Rebooting...\r\n");
     HAL_NVIC_SystemReset();
     return 0;
 }
 
 uint8_t displayMenu() {
     console_clear();
-    menu_print(console_print);
+    menu_print(console_puts);
     return 0;
 }
 
 uint8_t unknownCommand() {
-    console_print("Unknown command\r\n");
+    console_puts("Unknown command\r\n");
     return 0;
 }
