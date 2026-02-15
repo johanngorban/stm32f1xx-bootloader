@@ -6,7 +6,7 @@
 #define DESCRIPTION_MAX_LENGTH (128)
 
 // typedef void (*menu_printer_t)(const char *, ...);
-typedef void (*menu_printer_t)(const char *str);
+typedef void (*menu_printer_t)(const char *str, ...);
 typedef uint8_t (*menu_handler_t)(void);
 
 typedef struct {

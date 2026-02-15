@@ -57,11 +57,7 @@ void menu_print(menu_printer_t print) {
     }
     
     for (uint8_t i = 0; i < menu_command_count; i++) {
-        // print("%s. %s\n", menu_entries[i].opcode, menu_entries[i].description);
-        print(menu_entries[i].opcode);
-        print(". ");
-        print(menu_entries[i].description);
-        print("\n\r");
+        print("%s. %s\n", menu_entries[i].opcode, menu_entries[i].description);
     }
     print("cmd>");
 }

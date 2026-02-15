@@ -12,7 +12,7 @@ uint8_t rebootSystem() {
 
 uint8_t displayMenu() {
     terminal_clear();
-    menu_print(terminal_puts);
+    menu_print(terminal_printf);
     return 0;
 }
 
