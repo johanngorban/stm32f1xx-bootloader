@@ -36,8 +36,7 @@ void app_start() {
 
         if (console_gets(consoleInput)) {
             // menu_execute(consoleInput);
-            console_puts(consoleInput);
-            console_puts("\n");
+            console_printf("%s\r\n", consoleInput);
         }
     }
 }

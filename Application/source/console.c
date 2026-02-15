@@ -3,6 +3,8 @@
 #include "stm32f1xx.h"
 
 #include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <ctype.h>
 
@@ -57,12 +59,24 @@ uint8_t console_init(UART_HandleTypeDef *huart) {
     return 0;
 }
 
+void console_printf(const char *fmt, ...) {
+    char buffer[CONSOLE_MAX_TX_DATA_LENGTH];
+
+    va_list args;
+    va_start(args, fmt);
+
+    vsnprintf(buffer, CONSOLE_MAX_TX_DATA_LENGTH, fmt, args);
+    console_puts(buffer);
+    va_end(args);
+}
+
 void console_putc(char c) {
     HAL_UART_Transmit(console_uart, (uint8_t *) &c, 1, 10);
 }
 
+
 void console_puts(const char *str) {
-    
+
     HAL_UART_Transmit(console_uart, (uint8_t *) str, strlen(str), 10);
 }
 
