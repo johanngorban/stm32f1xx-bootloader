@@ -9,7 +9,8 @@
 static UART_HandleTypeDef *console_uart = NULL;
 
 // Terminal buffer
-static ring_buffer_t console_buffer;
+static char console_buffer[CONSOLE_MAX_RX_DATA_LENGTH];
+static volatile uint16_t console_buffer_length = 0;
 static volatile uint8_t rx_ready = 0;
 
 // TX Buffer
@@ -37,7 +38,8 @@ uint8_t console_init(UART_HandleTypeDef *huart) {
     ring_buffer_init(&rx_buffer);
     rx_ready = 0;
 
-    ring_buffer_init(&console_buffer);
+    memset(console_buffer, 0, CONSOLE_MAX_RX_DATA_LENGTH);
+    console_buffer_length = 0;
 
     HAL_UART_RegisterCallback(
         console_uart,
@@ -45,11 +47,11 @@ uint8_t console_init(UART_HandleTypeDef *huart) {
         console_rx_callback
     );
 
-    HAL_UART_RegisterCallback(
-        console_uart,
-        HAL_UART_TX_COMPLETE_CB_ID,
-        console_tx_callback
-    );
+    // HAL_UART_RegisterCallback(
+    //     console_uart,
+    //     HAL_UART_TX_COMPLETE_CB_ID,
+    //     console_tx_callback
+    // );
 
     HAL_UART_Receive_IT(console_uart, (uint8_t *) &rx_byte, 1);
     return 0;
@@ -60,6 +62,7 @@ void console_putc(char c) {
 }
 
 void console_puts(const char *str) {
+    
     HAL_UART_Transmit(console_uart, (uint8_t *) str, strlen(str), 10);
 }
 
@@ -73,13 +76,15 @@ uint16_t console_gets(char *buffer) {
     }
 
     if (rx_ready == 1) {
-        uint16_t length = ring_buffer_get_length(&console_buffer);
-        ring_buffer_read(&console_buffer, (uint8_t *) buffer, length);
+        strcpy(buffer, console_buffer);
+        buffer[console_buffer_length] = '\0';
         
-        buffer[length] = '\0';
-        ring_buffer_clear(&console_buffer);
+        memset(console_buffer, 0, CONSOLE_MAX_RX_DATA_LENGTH);
 
         rx_ready = 0;
+
+        uint16_t length = console_buffer_length;
+        console_buffer_length = 0;
 
         return length;
     }
@@ -91,14 +96,15 @@ uint16_t console_gets(char *buffer) {
             console_puts("\r\n");
         }
         else if (ch == '\b') {
-            if (ring_buffer_get_length(&console_buffer) > 0) {
-                ring_buffer_pop_back(&console_buffer);
+            if (console_buffer_length > 0) {
+                console_buffer_length--;
+                console_buffer[console_buffer_length] = '\0';
                 console_puts("\b \b");
             }
         }
         else if (ch >= 32 && ch <= 126) {
-            if (ring_buffer_get_length(&console_buffer) < CONSOLE_MAX_RX_DATA_LENGTH - 1) {
-                ring_buffer_push(&console_buffer, ch);
+            if (console_buffer_length < CONSOLE_MAX_RX_DATA_LENGTH - 1) {
+                console_buffer[console_buffer_length++] = ch;
                 console_putc(ch);
             }
         }
