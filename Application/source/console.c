@@ -109,7 +109,7 @@ uint16_t console_gets(char *buffer) {
             rx_ready = 1;
             console_puts("\r\n");
         }
-        else if (ch == '\b') {
+        else if (ch == '\b' || ch == 0x7F) {
             if (console_buffer_length > 0) {
                 console_buffer_length--;
                 console_buffer[console_buffer_length] = '\0';
