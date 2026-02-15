@@ -1,7 +1,7 @@
 #include "app.h"
 #include "menu.h"
 #include "menu_handlers.h"
-#include "console.h"
+#include "terminal.h"
 #include <string.h>
 
 const static menu_entry_t menu_entries[] = {
@@ -16,17 +16,17 @@ void app_init(const app_context_t *ctx) {
         return;
     }
 
-    console_init(ctx->consoleUart);    
+    terminal_init(ctx->terminalUart);    
     menu_init(menu_entries, 2, unknownCommand);
 }
 
 void app_start() {
     uint32_t lastBlink = 0;
 
-    char consoleInput[CONSOLE_MAX_RX_DATA_LENGTH];
-    memset(consoleInput, 0, CONSOLE_MAX_RX_DATA_LENGTH);
+    char terminalInput[TERMINAL_MAX_RX_DATA_LENGTH];
+    memset(terminalInput, 0, TERMINAL_MAX_RX_DATA_LENGTH);
 
-    console_clear();
+    terminal_clear();
 
     while(1) {
         if (HAL_GetTick() - lastBlink >= 500) {
@@ -34,9 +34,9 @@ void app_start() {
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
         }
 
-        if (console_gets(consoleInput)) {
-            // menu_execute(consoleInput);
-            console_printf("%s\r\n", consoleInput);
+        if (terminal_gets(terminalInput)) {
+            // menu_execute(terminalInput);
+            terminal_printf("%s\r\n", terminalInput);
         }
     }
 }

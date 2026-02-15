@@ -1,22 +1,22 @@
 #include "menu_handlers.h"
-#include "console.h"
+#include "terminal.h"
 #include "menu.h"
 #include "stm32f1xx_hal.h"
 
 uint8_t rebootSystem() {
-    console_clear();
-    console_puts("Rebooting...\r\n");
+    terminal_clear();
+    terminal_puts("Rebooting...\r\n");
     HAL_NVIC_SystemReset();
     return 0;
 }
 
 uint8_t displayMenu() {
-    console_clear();
-    menu_print(console_puts);
+    terminal_clear();
+    menu_print(terminal_puts);
     return 0;
 }
 
 uint8_t unknownCommand() {
-    console_puts("Unknown command\r\n");
+    terminal_puts("Unknown command\r\n");
     return 0;
 }

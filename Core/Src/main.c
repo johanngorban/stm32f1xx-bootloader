@@ -92,7 +92,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   app_context_t appContext;
-  appContext.consoleUart = &huart1;
+  appContext.terminalUart = &huart1;
 
   app_init(&appContext);
   /* USER CODE END 2 */
