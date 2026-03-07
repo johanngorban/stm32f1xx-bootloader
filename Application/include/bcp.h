@@ -15,7 +15,7 @@ typedef enum {
     BLIP_CALC_BANK_CRC    = 0x03,
     BLIP_RUN_FIRMWARE     = 0x04,
     BLIP_GET_VERSION      = 0x05,
-} blip_command_t;
+} bcp_command_t;
 
 typedef enum {
     BLIP_OK                    = 0x00,
@@ -24,14 +24,14 @@ typedef enum {
     BLIP_ERROR_BAD_CRC         = 0x03,
     BLIP_ERROR_BUSY            = 0x04,
     BLIP_ERROR_MEMORY          = 0x05,
-} blip_status_t;
+} bcp_status_t;
 
 typedef struct {
     uint8_t command;
     uint8_t length;
     uint8_t data[BLIP_MAX_DATA_LENGTH];
     uint16_t crc;
-} blip_request_t;
+} bcp_request_t;
 
 typedef struct {
     uint8_t command;
@@ -39,17 +39,17 @@ typedef struct {
     uint8_t length;
     uint8_t data[BLIP_MAX_DATA_LENGTH];
     uint16_t crc;
-} blip_response_t;
+} bcp_response_t;
 
-uint8_t blip_request_init(blip_request_t *request);
+uint8_t bcp_request_init(bcp_request_t *request);
 
-uint8_t blip_request_parse(blip_request_t *request, const uint8_t *data, uint8_t length);
+uint8_t bcp_request_parse(bcp_request_t *request, const uint8_t *data, uint8_t length);
 
-uint8_t blip_response_init(blip_response_t *response);
+uint8_t bcp_response_init(bcp_response_t *response);
 
-uint8_t blip_response_set_data(blip_response_t *response, const uint8_t *data, uint8_t length);
+uint8_t bcp_response_set_data(bcp_response_t *response, const uint8_t *data, uint8_t length);
 
-uint8_t blip_response_to_bytes(const blip_response_t *response, uint8_t *data);
+uint8_t bcp_response_to_bytes(const bcp_response_t *response, uint8_t *data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,8 +59,8 @@ uint8_t blip_response_to_bytes(const blip_response_t *response, uint8_t *data);
 
 #include "stm32f1xx_hal.h"
 
-void blip_uart_init(UART_HandleTypeDef *huart);
+void bcp_uart_init(UART_HandleTypeDef *huart);
 
-void blip_send(const blip_response_t *response);
+void bcp_send(const bcp_response_t *response);
 
-uint8_t blip_receive(blip_request_t *request);
+uint8_t bcp_receive(bcp_request_t *request);

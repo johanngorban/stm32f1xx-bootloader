@@ -1,16 +1,16 @@
 #include "app.h"
-#include "blip.h"
+#include "bcp.h"
 #include "router.h"
 #include <stdbool.h>
 
 extern UART_HandleTypeDef huart1;
 
 void app_init() {
-    blip_uart_init(&huart1);
+    bcp_uart_init(&huart1);
 }
 
 void app_run() {
-    blip_request_t request;
+    bcp_request_t request;
     bool activity_detected = false;
 
     while(1) {
@@ -18,7 +18,7 @@ void app_run() {
         //     jump_to_app();
         // }
 
-        if (blip_receive(&request)) {
+        if (bcp_receive(&request)) {
             activity_detected = true;
 
             router_handle_request(&request);

@@ -55,8 +55,9 @@ Core/Src/system_stm32f1xx.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
 Application/source/app.c \
-Application/source/blip.c \
-Application/source/handlers.c
+Application/source/bcp.c \
+Application/source/handlers.c \
+Application/source/router.c \
 
 
 # ASM sources

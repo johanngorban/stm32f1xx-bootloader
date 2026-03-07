@@ -1,15 +1,15 @@
-#include "blip.h"
+#include "bcp.h"
 #include <string.h>
 
-uint8_t blip_request_init(blip_request_t *request) {
+uint8_t bcp_request_init(bcp_request_t *request) {
     if (request == NULL) {
         return 1;
     }
-    memset(request, 0, sizeof(blip_request_t));
+    memset(request, 0, sizeof(bcp_request_t));
     return 0;
 }
 
-uint8_t blip_request_parse(blip_request_t *request, const uint8_t *data, uint8_t length) {
+uint8_t bcp_request_parse(bcp_request_t *request, const uint8_t *data, uint8_t length) {
     if (request == NULL || data == NULL) {
         return 1;
     }
@@ -32,19 +32,19 @@ uint8_t blip_request_parse(blip_request_t *request, const uint8_t *data, uint8_t
     return 0;
 }
 
-uint8_t blip_response_init(blip_response_t *response) {
+uint8_t bcp_response_init(bcp_response_t *response) {
     if (response == NULL) {
         return 1;
     }
-    memset(response, 0, sizeof(blip_response_t));
+    memset(response, 0, sizeof(bcp_response_t));
     return 0;
 }
 
-uint8_t blip_response_set_data(blip_response_t *response, const uint8_t *data, uint8_t length) {
+uint8_t bcp_response_set_data(bcp_response_t *response, const uint8_t *data, uint8_t length) {
     return 0;
 }
 
-uint8_t blip_response_to_bytes(const blip_response_t *response, uint8_t *data) {
+uint8_t bcp_response_to_bytes(const bcp_response_t *response, uint8_t *data) {
     return 0;
 }
 
@@ -57,7 +57,7 @@ uint8_t blip_response_to_bytes(const blip_response_t *response, uint8_t *data) {
 
 static  UART_HandleTypeDef *uart = NULL;
 
-void blip_uart_init(UART_HandleTypeDef *huart) {
+void bcp_uart_init(UART_HandleTypeDef *huart) {
     if (uart != NULL) {
         return;
     }
@@ -65,7 +65,7 @@ void blip_uart_init(UART_HandleTypeDef *huart) {
     uart = huart;
 }
 
-void blip_send(const blip_response_t *response) {
+void bcp_send(const bcp_response_t *response) {
     uint16_t packet_length = 1 + BLIP_RESPONSE_HEADER_SIZE + response->length + 2;
     uint8_t packet[packet_length];
 
@@ -79,7 +79,7 @@ void blip_send(const blip_response_t *response) {
     HAL_UART_Transmit(uart, packet, packet_length, HAL_MAX_DELAY);
 }
 
-uint8_t blip_receive(blip_request_t *request) {
+uint8_t bcp_receive(bcp_request_t *request) {
     uint8_t sof_byte = 0;
     do {
         HAL_UART_Receive(uart, &sof_byte, 1, HAL_MAX_DELAY);
