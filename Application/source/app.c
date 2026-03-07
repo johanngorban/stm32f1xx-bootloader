@@ -1,6 +1,6 @@
 #include "app.h"
 #include "blip.h"
-#include "handlers.h"
+#include "router.h"
 #include <stdbool.h>
 
 extern UART_HandleTypeDef huart1;
@@ -21,9 +21,7 @@ void app_run() {
         if (blip_receive(&request)) {
             activity_detected = true;
 
-            blip_response_t response;
-            handle_request(&request, &response);
-            blip_send(&response);
+            router_handle_request(&request);
         }
     }
 }

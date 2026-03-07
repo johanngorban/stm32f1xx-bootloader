@@ -9,6 +9,7 @@
 #define BLIP_SOF_BYTE (0xAAu)
 
 typedef enum {
+    BLIP_UNKNOWN_COMMAND  = 0x00,
     BLIP_UPLOAD_FIRMWARE  = 0x01,
     BLIP_UPDATE_FIRMWARE  = 0x02,
     BLIP_CALC_BANK_CRC    = 0x03,
@@ -60,6 +61,6 @@ uint8_t blip_response_to_bytes(const blip_response_t *response, uint8_t *data);
 
 void blip_uart_init(UART_HandleTypeDef *huart);
 
-void blip_send(const blip_response_t *request);
+void blip_send(const blip_response_t *response);
 
-uint8_t blip_receive(blip_request_t *response);
+uint8_t blip_receive(blip_request_t *request);

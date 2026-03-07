@@ -1,11 +1,20 @@
 #include "handlers.h"
 #include <string.h>
 
-void handle_request(const blip_request_t *request, blip_response_t *response) {
-    blip_response_init(response);
-    response->command = request->command;
-    response->status = BLIP_OK;
-    response->length = BLIP_MAX_DATA_LENGTH;
-    response->crc = 0xAA;
-    memset(response->data, 1, response->length);
+void handle_unknown_command(const blip_request_t *request, blip_response_t *response) {
+}
+
+void handle_upload_firmware(const blip_request_t *request, blip_response_t *response) {
+}
+
+void handle_update_firmware(const blip_request_t *request, blip_response_t *response) {
+}
+
+void handle_calc_bank_crc(const blip_request_t *request, blip_response_t *response) {
+}
+
+void handle_run_firmware(const blip_request_t *request, blip_response_t *response) {
+}
+
+void handle_get_version(const blip_request_t *request, blip_response_t *response) {
 }
