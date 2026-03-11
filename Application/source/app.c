@@ -1,5 +1,6 @@
 #include "app.h"
 #include "bcp.h"
+#include "bcp_io.h"
 #include "router.h"
 #include <stdbool.h>
 
@@ -11,6 +12,8 @@ void app_init() {
 
 void app_run() {
     bcp_request_t request;
+    bcp_request_init(&request);
+
     bool activity_detected = false;
 
     while(1) {
@@ -18,10 +21,12 @@ void app_run() {
         //     jump_to_app();
         // }
 
-        if (bcp_receive(&request)) {
+        int8_t status = bcp_recv_request(&request);
+        if (status == BCP_RECV_OK) {
             activity_detected = true;
 
             router_handle_request(&request);
+            bcp_request_init(&request);
         }
     }
 }

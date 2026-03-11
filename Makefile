@@ -58,7 +58,8 @@ Application/source/app.c \
 Application/source/bcp.c \
 Application/source/handlers.c \
 Application/source/router.c \
-Application/source/crc.c
+Application/source/crc.c \
+Application/source/bcp_io.c
 
 
 # ASM sources

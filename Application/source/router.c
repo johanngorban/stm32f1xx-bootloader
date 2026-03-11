@@ -1,5 +1,7 @@
 #include "router.h"
 #include "handlers.h"
+#include "bcp_io.h"
+#include <stddef.h>
 
 static const router_entry_t router[] = {
     {BCP_UPLOAD_FIRMWARE, handle_upload_firmware},
@@ -31,7 +33,7 @@ static void send_error(bcp_command_t cmd, bcp_status_t status) {
     response.status = status;
     response.crc = bcp_response_calculate_crc16(&response);
 
-    bcp_send(&response);
+    bcp_send_response(&response);
 }
 
 void router_handle_request(const bcp_request_t *request) {
@@ -59,5 +61,5 @@ void router_handle_request(const bcp_request_t *request) {
     response.status = BCP_OK;
     response.crc = bcp_response_calculate_crc16(&response);
 
-    bcp_send(&response);
+    bcp_send_response(&response);
 }
